@@ -4,7 +4,7 @@ date: 2021-09-07 18:15:08
 tags: nestjs sentry nestjs-sentry
 ---
 
-# setup sentry with
+# setup sentry with nestjs-sentry
 
 ### nestjs sentry
 - [nestjs-sentry](https://github.com/ntegral/nestjs-sentry#getting-started)
@@ -121,3 +121,7 @@ tags: nestjs sentry nestjs-sentry
     ```
 
   - About the `useValue` And `useClass` the different is in here [Different providers](https://docs.nestjs.cn/8/fundamentals)
+
+### other source
+- [nest-raven](https://github.com/mentos1386/nest-raven)
+- [Setup the sentry client in the custom UseInterceptors](https://mantosz.medium.com/use-sentry-with-nestjs-6d255027d3e1)
