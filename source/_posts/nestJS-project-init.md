@@ -21,6 +21,10 @@ tags:
   - nest new {project-name} --directory `[位置路径]`
   - nest new {project-name} --skip-git 
 
+- generate|g [options] <schematic> [name] [path]  Generate a Nest element.
+- nest g  module name [path] `这里的path 是以src 为root 的`
+- eg: `nest g co client modules` 是在src/modules 下面
+
 ## 添加 config 模块
 - 下载 config pack `npm i --save @nestjs/config` 它使用了 [dotenv](https://github.com/motdotla/dotenv) `@nestjs/config requires TypeScript 4.1 or later.`
 - 在 `app.module.ts` 导入
@@ -101,4 +105,96 @@ npm install --save-dev cross-env
 ```
 
 ## 设置logger
-- 
+- 通过 @nestjs/common 可以引入 Logger  类用作 里面的logger service
+```test
+  - disable logging entirely
+  - specify the log level of detail (e.g., display errors, warnings, debug information, etc.)
+  - override timestamp in the default logger (e.g., use ISO8601 standard as date format)
+  - completely override the default logger
+  - customize the default logger by extending it
+  - make use of dependency injection to simplify composing and testing your application
+```
+- 也可以继承后 重新创建一个实现，来更改logger
+- 更加高级的办法也可以使用其他的logger 框架， [winston](https://github.com/winstonjs/winston)
+
+
+- 基础使用添加logger 到系统
+- `如果需要特殊配置的话可以设置，如果不需要的话，可以不配置`
+```TypeScript
+const app = await NestFactory.create(AppModule, {
+  logger: ['error', 'warn'], //'log', 'error', 'warn', 'debug', and 'verbose'. false 意思是禁用logger
+});
+await app.listen(3000);
+
+//在其他service 中可以直接使用
+
+import { Logger, Injectable } from '@nestjs/common';
+
+@Injectable()
+class MyService {
+  private readonly logger = new Logger(MyService.name);
+
+  doSomething() {
+    this.logger.log('Doing something...');
+  }
+}
+```
+
+- 使用 基础办法，需要在每一个用到service的地方使用new logger()
+
+- 所以我们需要进阶办法，
+- 创建一个logger module。让它成为全局module， 然后，在每一用到的地方，使用
+- 创建一个 loggerModule
+- 创建一个 loggerService类 实现 loggerService 这个接口. 因为 `ConsoleLogger 已经实现了 LoggerService` 所以这里我们可以直接 extends 这个 ConsoleLogger 类
+
+- 并export loggerService. 然后在app.module 里面导入它，并设置为全局
+- 我们可以使用了 在需要的地方的constructor()引入就可以使用了
+```TypeScript
+import { Injectable } from '@nestjs/common';
+import { MyLogger } from './my-logger.service';
+
+@Injectable()
+export class CatsService {
+  constructor(private myLogger: MyLogger) {
+    // Due to transient scope, CatsService has its own unique instance of MyLogger,
+    // so setting context here will not affect other instances in other services
+    this.myLogger.setContext('CatsService'); //CatsService.name
+  }
+
+  findAll(): Cat[] {
+    // You can call all the default methods
+    this.myLogger.warn('About to return cats!');
+    // And your custom methods
+    this.myLogger.customLog();
+    const cats: Cat[] = [];
+    return cats;
+  }
+}
+```
+
+
+
+
+####  如何设置一个module 为全局注册
+
+- [global module](https://docs.nestjs.com/modules#global-modules)
+- Nestjs 的设计理念就是module 是独立的，必须引入之后才能起作用。
+- 那面多多次引入我们可以设置这个 module  是全局的 然后再 根module 里面引入一次以后就不需要再继续引用了。 
+```typescript
+import { Module, Global } from '@nestjs/common';
+import { CatsController } from './cats.controller';
+import { CatsService } from './cats.service';
+
+@Global()
+@Module({
+  controllers: [CatsController],
+  providers: [CatsService],
+  exports: [CatsService],
+})
+export class CatsModule {}
+
+The @Global() decorator makes the module global-scoped. Global modules should be registered only once, generally by the root or core module. In the above example, the CatsService provider will be ubiquitous, and modules that wish to inject the service will not need to import the CatsModule in their imports array.
+```
+- 应该只能引入一次， 在根节点。 然后 那个 providers和export的 service就会无处不在。只需要引入service 就可以了。 在其他module里面不需要providers 和import它了。
+
+
