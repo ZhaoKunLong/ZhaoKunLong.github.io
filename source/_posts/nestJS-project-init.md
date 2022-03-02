@@ -197,4 +197,56 @@ The @Global() decorator makes the module global-scoped. Global modules should be
 ```
 - 应该只能引入一次， 在根节点。 然后 那个 providers和export的 service就会无处不在。只需要引入service 就可以了。 在其他module里面不需要providers 和import它了。
 
+## 如何设置 nestjs  Debugging
 
+
+- [通过vscode  的自动附加来进行添加](https://www.jianshu.com/p/5a4d1d5234e3)
+-  设置debug: 自动附加。
+- 然后启动 npm run start:debug   检测到自动附加后就可以调试。
+
+##### 想要实现在 launch 里面直接启动。然后附加的话。就比较难了
+- [vscode 里面的launch](https://javascript.plainenglish.io/debugging-nestjs-in-vscode-d474a088c63b)
+- 设置 Vscode 的 launch.js
+-  通过设置 task.js 来进行启动程序。 然后再launch里面使用 acctach
+```json
+// `launch.json`
+{
+    "configurations": [
+        {
+            "type": "node",
+            "name": "Run Script: start:debug",
+            "request": "attach",
+            "port": 9229,            
+            "preLaunchTask":"npm: start:debug",
+            "cwd": "${workspaceFolder}",
+        }
+    ]
+}
+
+// tasks.json
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "npm: start:debug",
+			"type": "npm",
+			"script": "start:debug",
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			},
+			"problemMatcher": [],
+			"detail": "cross-env NODE_ENV=development nest start --debug --watch"
+		}
+	]
+}
+```
+- 这样无法停止。尝试办法 
+    - 所以先尝试是否能够通过自带的先启动加断点 - 无法启动。 还是会出现 ·Waiting for the debugger to disconnect...· 暂时无法解决
+    - 使用launch.js 启动命令行 所以失败
+    - 使用 task 定义，再launch 启动时候启动task `start：debug` 然后再关闭的时候关闭 task. 但是这样就无法进行断点， 需要将断点设置为智能。然后 通过attach 进行调试，这样。当关闭链接的时候。是无法触发 postDebugTask 进行task  关闭的。
+    - 使用 attach 无法trigger `postDebugTask` 也就无法停止debug.
+- 自定义 launch 
+  -  这条路也走不通了
+
+- 最终解决就是先使用 start：debug 然后选择智能attach 不使用 launch
