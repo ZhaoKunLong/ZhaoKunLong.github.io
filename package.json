@@ -9,7 +9,7 @@
     "server": "hexo server"
   },
   "hexo": {
-    "version": "5.4.0"
+    "version": "5.4.1"
   },
   "dependencies": {
     "hexo": "^5.0.0",
@@ -24,5 +24,8 @@
     "hexo-renderer-sass": "^0.4.0",
     "hexo-renderer-stylus": "^2.0.0",
     "hexo-server": "^2.0.0"
+  },
+  "devDependencies": {
+    "node-sass": "^6.0.1"
   }
 }
