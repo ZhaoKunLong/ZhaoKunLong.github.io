@@ -354,3 +354,15 @@ exports.helloWorld = (req, res) => {
     }),
   );
   ```
+
+## 转换数据
+  - 转换数据为array
+  ```Typescript
+    @Get()
+    findByIds(
+      @Query('id', new ParseArrayPipe({ items: Number, separator: ',' }))
+      ids: number[],
+    ) {
+      return 'This action returns users by ids';
+    }
+  ```
