@@ -345,7 +345,7 @@ exports.helloWorld = (req, res) => {
   ```sh
    npm i --save class-validator class-transformer
   ```
-  2. 在全局使用 main.ts
+  2. 在全局使用 main.ts 设置了 transform 不能 对DTO 里面的数据类型进行 转换
   ```Typescript
   app.useGlobalPipes(
     new ValidationPipe({
@@ -356,7 +356,7 @@ exports.helloWorld = (req, res) => {
   ```
 
 ## 转换数据
-  - 转换数据为array
+  - 转换数据为array 
   ```Typescript
     @Get()
     findByIds(
@@ -366,3 +366,9 @@ exports.helloWorld = (req, res) => {
       return 'This action returns users by ids';
     }
   ```
+  - `nestjs/mapped-types` DTO 继承包
+    - `PartialType()`  全部变成 `isOptional()`
+    - `PickType(DTO， [attr] )` 挑选出需要的
+    - `OmitType(DTO, [attr])` 去除不需要的类型
+    - `IntersectionType(aDTO, bDTO)` 把两个类型合并到一起。 
+
